@@ -15,6 +15,7 @@ class PongClient():
         self.clients = {} #ClientID, [(pos), name]
         self.player_pos = (0, 0)
         self.ball_pos = (0, 0)
+        self.points = [0, 0]
         self.my_counter = 0
         self.other_player_counter = 0
 
@@ -25,6 +26,8 @@ class PongClient():
             self.my_counter += 1
         elif packet_type == PacketType.REQUEST_ID:
             packet = struct.pack(f">B{len(self.name)}s", packet_type, self.name.encode())
+        elif packet_type == PacketType.POINT:
+            packet = struct.pack(f">BBBB", packet_type, self.client_id, *self.points)
         return packet
     
     def send_packet(self, packet):
@@ -51,10 +54,15 @@ class PongClient():
                         packet_type, client_id, counter, x_pos, y_pos, ball_x, ball_y = struct.unpack(">BBQIIff",data)     
                         if counter > self.other_player_counter:
                             self.other_player_counter = counter
-                            self.clients[client_id][0] = (int(x_pos), int(y_pos))
+                            self.clients[client_id][0] = (x_pos, y_pos)
                         if client_id == 0:
                             self.ball_pos = (ball_x, ball_y)
+                    elif packet_type == PacketType.POINT:
+                        packet_type, client_id, player_1_points, player_2_points = struct.unpack(">BBBB",data)     
+                        if client_id == 0:
+                            self.points = (player_1_points, player_2_points)
                 except Exception as e:
+                    print("Error: ", e)
                     pass
 
     def run_client(self):        
@@ -68,6 +76,10 @@ class PongClient():
 
     def send_position_data(self):
         packet = self.create_packet(PacketType.POSITION, (*self.pos, *self.ball_pos))
+        self.send_packet(packet)
+
+    def send_points_data(self):
+        packet = self.create_packet(PacketType.POINT, (*self.pos, *self.ball_pos))
         self.send_packet(packet)
 
 

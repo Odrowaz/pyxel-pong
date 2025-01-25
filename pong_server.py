@@ -68,7 +68,18 @@ def start_server():
             elif packet_type == PacketType.POSITION:
                 _, client_id, _, x_pos, y_pos, ball_x, ball_y = struct.unpack(">BBQIIff", data)
                 if DEBUG_MODE:
-                    print(f"Received position update from client ID {client_id}: x={x_pos}, y={y_pos}")
+                    print(f"Received position update from client ID {client_id}: x={x_pos}, y={y_pos} ball_x={ball_x}, ball_y={ball_y}")
+
+                # Broadcast the position update to all other clients
+                for client in clients:
+                    if client != client_address:
+                        server_socket.sendto(data, client)
+
+            # Handle POINT packet
+            elif packet_type == PacketType.POINT:
+                _, client_id, player_1_points, player_2_points = struct.unpack(">BBBB", data)
+                if DEBUG_MODE:
+                    print(f"Received points update from client ID {client_id}: Player 1={player_1_points}, Player 2={player_2_points}")
 
                 # Broadcast the position update to all other clients
                 for client in clients:

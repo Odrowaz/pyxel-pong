@@ -37,13 +37,19 @@ class App():
         if self.game_started:
             self.update_manager.tick()
             self.physics_manager.tick()
-            manage_score((self.player1, self.player2), self.ball, self.network)
+            manage_score((self.player1, self.player2), self.ball, self.network, self.client)
         elif self.client.client_id != '' and not self.connected:
             pos = self.client.pos
-            self.player1 = pong_players.Player1(pos[0], pos[1], 9, True, self.client)
-            self.draw_manager.register(self.player1)
-            self.update_manager.register(self.player1)
-            self.physics_manager.register(self.player1)
+            player = None
+            if self.client.client_id == 0:
+                self.player1 = pong_players.Player1(pos[0], pos[1], 9, True, self.client)
+                player = self.player1
+            else:
+                self.player2 = pong_players.Player1(pos[0], pos[1], 9, True, self.client)
+                player = self.player2
+            self.draw_manager.register(player)
+            self.update_manager.register(player)
+            self.physics_manager.register(player)
             self.connected = True
             
         elif len(self.client.clients) > 0:
@@ -52,11 +58,16 @@ class App():
             if len(player_data) == 2:
                 pos = player_data[0]
                 player_name = player_data[1]
-                print(pos)
-                self.player2 = pong_players.PlayerNet(pos[0], pos[1], 2, player_id, self.client, player_name)
-                self.draw_manager.register(self.player2)
-                self.update_manager.register(self.player2)
-                self.physics_manager.register(self.player2)
+                player2 = None
+                if self.client.client_id == 0:
+                    self.player2 = pong_players.PlayerNet(pos[0], pos[1], 2, player_id, self.client, player_name)
+                    player2 = self.player2
+                else:
+                    self.player1 = pong_players.PlayerNet(pos[0], pos[1], 2, player_id, self.client, player_name)
+                    player2 = self.player1
+                self.draw_manager.register(player2)
+                self.update_manager.register(player2)
+                self.physics_manager.register(player2)
 
         if self.player1 != None and self.player2 != None and not self.game_started:
             self.ball = self.ball = PongBall(7, self.client.client_id == 0, self.client)

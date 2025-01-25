@@ -54,12 +54,13 @@ class PongBall():
             self.base_speed +=0.3
     
     def collide(self, other):
-        self.base_speed +=0.3
-        padding = 1
-        self.x_speed *= -padding
-        self.y_speed = self.get_random_dir()
-        if self.x > pyxel.width * 0.5:
-            self.x = other.x - padding
-        else:
-            self.x = other.x + other.width + padding
-        self.client.ball_pos = (self.x, self.y)
+        if self.master:
+            self.base_speed +=0.3
+            padding = 1
+            self.x_speed *= -padding
+            self.y_speed = self.get_random_dir()
+            if self.x > pyxel.width * 0.5:
+                self.x = other.x - padding
+            else:
+                self.x = other.x + other.width + padding
+            self.client.ball_pos = (self.x, self.y)
