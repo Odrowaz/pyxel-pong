@@ -178,7 +178,7 @@ class MainWindow(QMainWindow):
             self.close()
             # Init Save File Before importing pong
             from pong_game import App
-            App(180,160)
+            App(180,160, False)
             
 app = QApplication()
 
