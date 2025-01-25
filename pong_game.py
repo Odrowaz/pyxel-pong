@@ -33,7 +33,6 @@ class App():
         pyxel.run(self.update, self.draw)
         
     def update(self):
-        self.client.run_client()
         if self.game_started:
             self.update_manager.tick()
             self.physics_manager.tick()
@@ -75,6 +74,7 @@ class App():
             self.draw_manager.register(self.ball)
             self.update_manager.register(self.ball)
             self.game_started = True
+        self.client.run_client()
     
     def draw(self):
         self.draw_manager.tick()

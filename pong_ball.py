@@ -54,7 +54,7 @@ class PongBall():
             self.base_speed +=0.3
     
     def collide(self, other):
-        if self.master:
+        #if self.master:
             self.base_speed +=0.3
             padding = 1
             self.x_speed *= -padding

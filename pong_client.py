@@ -21,7 +21,6 @@ class PongClient():
 
     def create_packet(self, packet_type, data = ()):
         if packet_type == PacketType.POSITION:
-            print(data)
             packet = struct.pack(">BBQIIff", packet_type, self.client_id, self.my_counter, *data)
             self.my_counter += 1
         elif packet_type == PacketType.REQUEST_ID:
@@ -81,9 +80,3 @@ class PongClient():
     def send_points_data(self):
         packet = self.create_packet(PacketType.POINT, (*self.pos, *self.ball_pos))
         self.send_packet(packet)
-
-
-if __name__ == "__main__":
-    print("Main client started")
-    client = PongClient()
-    client.run_client()
