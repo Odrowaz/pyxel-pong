@@ -13,10 +13,16 @@ class PongClient():
         self.socket_list = [self.client_socket]
         self.is_client_running = True
         self.clients = {} #ClientID, [(pos), name]
+        self.player_pos = (0, 0)
+        self.ball_pos = (0, 0)
+        self.my_counter = 0
+        self.other_player_counter = 0
 
     def create_packet(self, packet_type, data = ()):
         if packet_type == PacketType.POSITION:
-            packet = struct.pack(">BBII", packet_type, self.client_id, *data)
+            print(data)
+            packet = struct.pack(">BBQIIff", packet_type, self.client_id, self.my_counter, *data)
+            self.my_counter += 1
         elif packet_type == PacketType.REQUEST_ID:
             packet = struct.pack(f">B{len(self.name)}s", packet_type, self.name.encode())
         return packet
@@ -29,7 +35,6 @@ class PongClient():
             if read_socket == self.client_socket:
                 try:
                     data, _ = self.client_socket.recvfrom(1024)
-                    # print(f"Receiving {len(data)} bytes")
                     packet_type, = struct.unpack(">B",data[:1])
                     if packet_type == PacketType.REQUEST_ID and self.client_id == '':
                         packet_type, received_client_id = struct.unpack(">BB",data)
@@ -39,13 +44,16 @@ class PongClient():
                     elif packet_type == PacketType.SPAWN:
                         print('Spawning')
                         packet_type, client_id, encoded_player_name = struct.unpack(f">BB{len(data) - 2}s", data)
-                        self.clients[client_id] = []
-                        self.clients[client_id].insert(1,encoded_player_name.decode())
+                        self.clients[client_id] = {}
+                        self.clients[client_id][1] = encoded_player_name.decode()
                         pass
                     elif packet_type == PacketType.POSITION:
-                        packet_type, client_id, x_pos, y_pos = struct.unpack(">BBII",data)     
-                        self.clients[client_id].insert(0, (int(x_pos), int(y_pos)))
-                        print("received packet with type {0} from clientID {1} wit pos x:{2} y:{3}".format(packet_type,client_id,x_pos,y_pos))
+                        packet_type, client_id, counter, x_pos, y_pos, ball_x, ball_y = struct.unpack(">BBQIIff",data)     
+                        if counter > self.other_player_counter:
+                            self.other_player_counter = counter
+                            self.clients[client_id][0] = (int(x_pos), int(y_pos))
+                        if client_id == 0:
+                            self.ball_pos = (ball_x, ball_y)
                 except Exception as e:
                     pass
 
@@ -53,13 +61,13 @@ class PongClient():
         self.read_sockets, _ , _ = select.select(self.socket_list,[],[],0)
         self.receive_data(self.read_sockets)
         if self.client_id != '':
-            self.send_position_data(self.pos[0],self.pos[1])
+            self.send_position_data()
         else:
             data = self.create_packet(PacketType.REQUEST_ID)
             self.send_packet(data)
 
-    def send_position_data(self, x_pos, y_pos):
-        packet = self.create_packet(PacketType.POSITION, (x_pos, y_pos))
+    def send_position_data(self):
+        packet = self.create_packet(PacketType.POSITION, (*self.pos, *self.ball_pos))
         self.send_packet(packet)
 
 
