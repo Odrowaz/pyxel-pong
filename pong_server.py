@@ -3,7 +3,7 @@ import struct
 from pong_networking_commons import PacketType
 
 DEBUG_MODE = True
-HOST = 'localhost'
+HOST = '0.0.0.0'
 PORT = 12345
 
 clients = {}  # Stores client addresses as keys and (client_id, player_name) as values
@@ -19,6 +19,7 @@ def start_server():
     is_server_running = True
 
     while is_server_running:
+        try:
             data, client_address = server_socket.recvfrom(1024)
             if not data:
                 if DEBUG_MODE:
@@ -85,10 +86,8 @@ def start_server():
                 for client in clients:
                     if client != client_address:
                         server_socket.sendto(data, client)
-
-            # Handle client disconnection (not explicitly implemented in UDP)
-            # You may need a heartbeat mechanism to detect disconnections
-
+        except Exception as e:
+            print("Server Error: ", e)
 
 if __name__ == "__main__":
     print("Server starting...")
