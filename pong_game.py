@@ -15,6 +15,7 @@ class App():
         self.physics_manager = PhysicsManager()
         self.game_started = False
         self.connected = False
+        self.ball = self.ball = PongBall(7)
         self.player1 = None
         self.player2 = None
         self.network = network
@@ -29,6 +30,8 @@ class App():
             self.game_started = True
         else:
             self.client = pong_client.PongClient(player_name)
+            self.client.ball = self.ball
+
 
         pyxel.run(self.update, self.draw)
         
@@ -38,6 +41,7 @@ class App():
             self.physics_manager.tick()
             manage_score((self.player1, self.player2), self.ball, self.network, self.client)
         elif self.client.client_id != '' and not self.connected:
+            print("Spawning Player 1")
             pos = self.client.pos
             player = None
             if self.client.client_id == 0:
@@ -54,7 +58,9 @@ class App():
         elif len(self.client.clients) > 0:
             player_id = list(self.client.clients.keys())[0]
             player_data = self.client.clients[player_id]
+            print(len(player_data))
             if len(player_data) == 2:
+                print("Opponent Connected! Spawing")
                 pos = player_data[0]
                 player_name = player_data[1]
                 player2 = None
@@ -69,7 +75,6 @@ class App():
                 self.physics_manager.register(player2)
 
         if self.player1 != None and self.player2 != None and not self.game_started:
-            self.ball = self.ball = PongBall(7, self.client.client_id == 0, self.client)
             self.physics_manager.register(self.ball)
             self.draw_manager.register(self.ball)
             self.update_manager.register(self.ball)

@@ -66,7 +66,7 @@ def start_server():
 
             # Handle POSITION packet
             elif packet_type == PacketType.POSITION:
-                _, client_id, _, x_pos, y_pos, ball_x, ball_y = struct.unpack(">BBQIIff", data)
+                _, client_id, _, x_pos, y_pos, ball_x, ball_y, _, _, _ = struct.unpack(">BBQIIfffff", data)
                 if DEBUG_MODE:
                     print(f"Received position update from client ID {client_id}: x={x_pos}, y={y_pos} ball_x={ball_x}, ball_y={ball_y}")
 

@@ -4,27 +4,21 @@ import numpy as np
 import math
 
 class PongBall():
-    def __init__(self, color, master, client):
+    def __init__(self, color):
         self.color = color
         self.radius = 3
         self.width = self.radius
         self.height = self.radius
         self.base_speed = 2
-        self.master = master
-        self.client = client
+
         self.reset()
         
     def get_random_dir(self):
         return random.choice(np.arange(-1.0, 1.1, 0.3))
     
     def update(self):
-        if self.master:
-            self.add_normalized_speed()
-            self.check_out_of_bounds()
-            self.client.ball_pos = (self.x, self.y)
-        else:
-            self.x = self.client.ball_pos[0]
-            self.y = self.client.ball_pos[1]
+        self.add_normalized_speed()
+        self.check_out_of_bounds()
         
     def draw(self):
         pyxel.circ(self.x, self.y, self.radius, self.color)
@@ -54,13 +48,11 @@ class PongBall():
             self.base_speed +=0.3
     
     def collide(self, other):
-        #if self.master:
-            self.base_speed +=0.3
-            padding = 1
-            self.x_speed *= -padding
-            self.y_speed = self.get_random_dir()
-            if self.x > pyxel.width * 0.5:
-                self.x = other.x - padding
-            else:
-                self.x = other.x + other.width + padding
-            self.client.ball_pos = (self.x, self.y)
+        self.base_speed +=0.3
+        padding = 1
+        self.x_speed *= -padding
+        self.y_speed = self.get_random_dir()
+        if self.x > pyxel.width * 0.5:
+            self.x = other.x - padding
+        else:
+            self.x = other.x + other.width + padding
